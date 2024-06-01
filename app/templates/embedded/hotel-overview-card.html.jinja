@@ -1,0 +1,35 @@
+{% for hotel in hotels %}
+    <div name="{{ hotel.id }}" class="d-flex" style="margin-bottom: 1em; justify-content: center">
+        <div class="card mb-3" style="width:800px; max-height: 180px;">
+            <div class="row g-0">
+                <div class="col-md-4">
+                    <img src="{{ url_for('static', path='images/' + hotel.image_id | string +'.webp') }}"
+                         class="img-fluid rounded-start" alt="hotel image">
+                </div>
+                <div class="col-md-8">
+                    <div class="card-body">
+                        <h5 class="card-title">{{ hotel.name }}</h5>
+                        <div class="d-flex justify-content-between mb-0" style="margin-top: -10px;">
+                            <div name="hotel_address">
+                                <p class="card-title text-muted small">{{ hotel.location }}</p>
+                            </div>
+                            <div>
+                                <a class="btn btn-warning" href="./hotels/{{ hotel.id }}/rooms?date_from={{ request.query_params.get("date_from") }}&date_to={{ request.query_params.get("date_to") }}" role="button">Pick Room</a>
+                            </div>
+                        </div>
+                        <div class="mb-1" style="max-width: 400px; margin-top: -1rem;">
+                            {% for service in hotel.services %}
+                                <span class="badge badge-pill bg-secondary">{{ service }}</span>
+                            {% endfor %}
+                        </div>
+                        <p>
+                            <small class="text-body-secondary">Rooms
+                                left: {{ hotel.rooms_left }} out
+                                of {{ hotel.rooms_quantity }}</small>
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endfor %}

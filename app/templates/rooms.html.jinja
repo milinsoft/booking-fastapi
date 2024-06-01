@@ -1,0 +1,52 @@
+{% extends 'base.html.jinja' %}
+
+{% block body %}
+{% for room in rooms %}
+    <div name="{{ room.id }}" class="d-flex" style="margin-bottom: 1em; justify-content: center">
+        <div class="card mb-3" style="width:800px; max-height: 180px;">
+            <div class="row g-0">
+                <div class="col-md-4">
+                    <img src="{{ url_for('static', path='images/' + room.image_id | string +'.webp') }}"
+                         class="img-fluid rounded-start" alt="room image">
+                </div>
+                <div class="col-md-5 mr-0">
+                    <div class="card-body">
+                        <h5 class="card-title">{{ room.name }}</h5>
+                        <div class="mb-1">
+                            {% for service in room.services %}
+                                <span class="badge badge-pill bg-secondary">{{ service }}</span>
+                            {% endfor %}
+                        </div>
+                        <p>
+                            <small class="text-body-secondary">Rooms
+                                left: {{ room.rooms_left }} out
+                                of {{ room.quantity }}</small>
+                        </p>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card-body me-0 text-end pb-0" style="margin-top: -1rem;">
+                        <h4>
+                            <strong class="card-text me-0">
+                            {{ "%.2f" | format(room.total_price) }}
+                        </strong>
+                        </h4>
+                        <div class="small" style="margin-top: -0.5rem;">
+                            <p class="card-text mb-0">for {{ total_days}} night(s)</p>
+                            <p class="card-text">{{ room.price }} per night</p>
+                            <div name="dates" style="margin-top: -0.5rem;">
+                                <p class="card-text mb-0">from {{ request.query_params.get('date_from') }}</p>
+                                <p class="card-text">to {{ request.query_params.get('date_to') }}</p>
+                            </div>
+                        </div>
+                        <div class="mt-1 mb-1">
+                            <a class="btn btn-warning" href="/bookings?{{ room.id }}&date_from={{ request.query_params.get("date_from") }}&date_to={{ request.query_params.get("date_to") }}" role="button">Checkout</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endfor %}
+
+{% endblock %}

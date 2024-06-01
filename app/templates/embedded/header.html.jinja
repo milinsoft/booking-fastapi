@@ -1,0 +1,15 @@
+<nav class="navbar bg-light">
+    <div class="container-fluid justify-content-between">
+        <a href="/" class="navbar-brand">Book your hotel</a>
+        <div name="buttons">
+            {% if logged_in != True %}
+                <a class="btn btn-warning" href="/login">Login</a>
+                <a class="btn btn-warning" href="/register">Register</a>
+            {% else %}
+                <form action="/logout" method="GET">
+                    <button id="submitBtn" class="btn btn-warning">Log out</button>
+                </form>
+            {% endif %}
+        </div>
+    </div>
+</nav>

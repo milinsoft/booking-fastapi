@@ -1,0 +1,31 @@
+{% extends "base.html.jinja" %}
+
+{% block body_style %}
+    background-image: url('{{ url_for('static', path='images/main_page/hotel_main_page.jpg') }}');
+    background-size: cover;
+    background-repeat: no-repeat;
+{% endblock %}
+
+
+{% block body %}
+    <div class="d-flex flex-column justify-content-center align-items-center">
+        <div name="index-title">
+            <h1 class="display-1" style="color: white;
+    font-family: 'Roboto Black';
+    font-weight: 900;
+    color: antiquewhite;
+    font-style: italic;
+">Your journey starts here!</h1>
+        </div>
+        <div name="search-form d-flex justify-content-center">
+            <form action="/hotels" class="d-flex justify-content-center" role="search">
+                <input name="location" class="form-control me-2" required="true" type="text" placeholder="City"
+                       aria-label="City"/>
+                <input name="date_from" class="form-control me-2" required="true" type="date" aria-label="date-from"/>
+                <input name="date_to" class="form-control me-2" required="true" type="date" aria-label="date-to"/>
+                <button class="btn btn-outline-warning" type="submit">Search</button>
+            </form>
+        </div>
+
+    </div>
+{% endblock %}

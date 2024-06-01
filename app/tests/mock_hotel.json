@@ -1,0 +1,44 @@
+[
+    {
+        "name": "Cosmos Collection Altay Resort",
+        "location": "Warsaw",
+        "services": ["Wi-Fi", "Pool", "Parking", "Air Conditioner"],
+        "rooms_quantity": 15,
+        "image_id": 1
+    },
+    {
+        "name": "Skala",
+        "location": "Warsaw",
+        "services": ["Wi-Fi", "Parking"],
+        "rooms_quantity": 23,
+        "image_id": 2
+    },
+    {
+        "name": "Marriott Hotel",
+        "location": "Warsaw",
+        "services": ["Parking"],
+        "rooms_quantity": 30,
+        "image_id": 3
+    },
+    {
+        "name": "Hastler Hotel",
+        "location": "Warsaw",
+        "services": ["Wi-Fi", "Parking", "Gym"],
+        "rooms_quantity": 55,
+        "image_id": 4
+    },
+    {
+        "name": "Palace",
+        "location": "Warsaw",
+        "services": ["Wi-Fi", "Parking", "Air Conditioner"],
+        "rooms_quantity": 22,
+        "image_id": 5
+    },
+    {
+        "name": "Bridge Resort",
+        "location": "Warsaw",
+        "services": ["Wi-Fi", "Parking", "Air Conditioner", "Gym"],
+        "rooms_quantity": 45,
+        "image_id": 6
+    }
+]

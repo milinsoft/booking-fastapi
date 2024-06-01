@@ -1,0 +1,26 @@
+[tool.black]
+line-length = 88
+target-version = ['py312']
+
+[tool.autoflake]
+in-place = true
+remove-all-unused-imports = true
+ignore-init-module-imports = true
+recursive = true
+imports = ["sqlalchemy", "app"]
+
+
+[tool.pyright]
+include = ["app"]
+reportAttributeAccessIssue=false
+reportFunctionMemberAccess=false
+exclude = ["app/migrations", "app/config.py"]
+reportIncompatibleMethodOverride = false
+reportOptionalMemberAccess = false
+reportGeneralTypeIssues = false
+reportIncompatibleReturnType = false
+reportReturnType = false
+typeCheckingMode = "basic"
+reportCallIssue = false
+
+
