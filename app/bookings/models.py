@@ -1,0 +1,18 @@
+from datetime import date
+
+from sqlalchemy import Computed, Date, ForeignKey
+from sqlalchemy.orm import Mapped, mapped_column
+
+from ..database import Base
+
+
+class Booking(Base):
+    __tablename__ = "bookings"
+
+    room_id: Mapped[int] = mapped_column(ForeignKey("rooms.id"))
+    user_id: Mapped[int] = mapped_column(ForeignKey("users.id"))
+    date_from: Mapped[date] = mapped_column(Date)
+    date_to: Mapped[date] = mapped_column(Date)
+    price: Mapped[float]
+    total_cost: Mapped[float] = mapped_column(Computed("(date_to - date_from) * price"))
+    total_days: Mapped[int] = mapped_column(Computed("date_to - date_from"))
