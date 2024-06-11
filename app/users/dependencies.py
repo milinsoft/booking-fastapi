@@ -4,9 +4,13 @@ from fastapi import Depends, HTTPException, Request, status
 from jose import JWTError, jwt
 
 from app.config import settings
-from app.exceptions import (ExpiredTokenException, IncorrectTokenFormat,
-                            InvalidCredentialsException, MissingTokenException,
-                            UserNotFoundException)
+from app.exceptions import (
+    ExpiredTokenException,
+    IncorrectTokenFormat,
+    InvalidCredentialsException,
+    MissingTokenException,
+    UserNotFoundException,
+)
 from app.users import User
 from app.users.dao import UserDAO
 

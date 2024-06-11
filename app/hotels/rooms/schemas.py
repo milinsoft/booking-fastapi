@@ -6,7 +6,7 @@ class SRoom(BaseModel):
     hotel_id: int
     name: str
     description: str
-    services: list
+    services: list[str]
     price: float
     quantity: int
     image_id: int

@@ -5,16 +5,22 @@ from fastapi import Depends, Response, status
 from sqlalchemy import CTE, and_, delete, func, or_, select
 
 from app.bookings import Booking
-from app.bookings.schemas import SBooking
+from app.bookings.schemas import SBooking, SBookingInfo
 from app.dao import BaseDAO
 from app.database import async_session_maker
 from app.dependencies import DateSearchArgs
-from app.exceptions import (BookingCancellationException,
-                            BookingNotFoundException, InvalidBookingDates,
-                            RoomBookingException)
+from app.exceptions import (
+    BookingCancellationException,
+    BookingNotFoundException,
+    InvalidBookingDates,
+    RoomBookingException,
+)
 from app.hotels import Hotel, Room
 from app.users import User
 from app.users.dependencies import get_current_user
+from pydantic import TypeAdapter
+
+bookings_adapter = TypeAdapter(list[SBookingInfo])
 
 
 class BookingDAO(BaseDAO):
@@ -33,8 +39,6 @@ class BookingDAO(BaseDAO):
             Booking.date_from <= date_from,
             Booking.date_to > date_from,
         )
-        from app.hotels import Hotel
-
         booked_rooms = (
             select(
                 Booking.room_id,
@@ -48,6 +52,17 @@ class BookingDAO(BaseDAO):
             .group_by(Room.hotel_id, Booking.room_id)
             .cte("booked_rooms")
         )
+        # RAW SQL QUERY with example params:
+        """
+        SELECT bookings.room_id, rooms.hotel_id, count(bookings.room_id) AS qty_booked
+        FROM bookings
+            JOIN rooms ON bookings.room_id = rooms.id
+            JOIN hotels ON rooms.hotel_id = hotels.id
+        WHERE hotels.location ILIKE '%Moscow%'
+          AND (bookings.date_from >= '2024-06-19' AND bookings.date_from <= '2024-06-22' OR
+               bookings.date_from <= '2024-06-19' AND bookings.date_to > '2024-06-19')
+        GROUP BY rooms.hotel_id, bookings.room_id
+        """
         return booked_rooms
 
     @classmethod
@@ -56,7 +71,11 @@ class BookingDAO(BaseDAO):
 
         async with async_session_maker() as session:
             get_rooms_left = (
-                select((Room.quantity - func.count(booked_rooms_cte.c.room_id)).label("Rooms left"))
+                select(
+                    (Room.quantity - func.count(booked_rooms_cte.c.room_id)).label(
+                        "Rooms left"
+                    )
+                )
                 .select_from(Room)
                 .join(
                     booked_rooms_cte,
@@ -71,7 +90,9 @@ class BookingDAO(BaseDAO):
             return rooms_left.scalar()
 
     @classmethod
-    async def add(cls, user_id: int, room_id: int, dates: DateSearchArgs) -> Booking | None:
+    async def add(
+        cls, user_id: int, room_id: int, dates: DateSearchArgs
+    ) -> Booking | None:
         date_from, date_to = dates.date_from, dates.date_to
         if await cls.__get_rooms_available_qty(room_id, dates):
             get_price = select(Room.price).where(Room.id == room_id)
@@ -89,8 +110,8 @@ class BookingDAO(BaseDAO):
 
     @classmethod
     async def get_user_bookings(cls, user_id: int):
-        # TODO: think about cascade in relations
-        stmt = (
+        """Returns all bookings for a particular user."""
+        get_bookings = (
             select(
                 cls.model.__table__.columns,
                 Room.name,
@@ -101,13 +122,26 @@ class BookingDAO(BaseDAO):
             .where(cls.model.user_id == user_id)
             .join(Room, Room.id == Booking.room_id)
         )
+
+        # RAW SQL QUERY with example params:
+        """
+        SELECT bookings.*,
+               rooms.name,
+               rooms.description,
+               rooms.services,
+               rooms.image_id
+        FROM bookings
+                 JOIN rooms ON rooms.id = bookings.room_id
+        WHERE bookings.user_id = 3
+        """
         async with async_session_maker() as session:
-            bookings = await session.execute(stmt)
-            res = bookings.mappings().all()
-            return [SBooking(**booking) for booking in res]
+            bookings = await session.execute(get_bookings)
+            return bookings_adapter.validate_python(bookings.all())
 
     @classmethod
-    async def delete_booking(cls, booking_id: int, user: User = Depends(get_current_user)):
+    async def delete_booking(
+        cls, booking_id: int, user: User = Depends(get_current_user)
+    ):
         user_id = user.id
         booking = await super().find_one_or_none(user_id=user_id, id=booking_id)
         if not booking:
@@ -115,6 +149,8 @@ class BookingDAO(BaseDAO):
         if booking.date_from <= date.today():
             raise BookingCancellationException
         async with async_session_maker() as session:
-            stmt = delete(cls.model).where(user_id == user_id, cls.model.id == booking_id)
+            stmt = delete(cls.model).where(
+                user_id == user_id, cls.model.id == booking_id
+            )
             await session.execute(stmt)
             await session.commit()

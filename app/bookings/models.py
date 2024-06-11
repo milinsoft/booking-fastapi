@@ -9,8 +9,8 @@ from ..database import Base
 class Booking(Base):
     __tablename__ = "bookings"
 
-    room_id: Mapped[int] = mapped_column(ForeignKey("rooms.id"))
-    user_id: Mapped[int] = mapped_column(ForeignKey("users.id"))
+    room_id: Mapped[int] = mapped_column(ForeignKey("rooms.id", ondelete="SET NULL"))
+    user_id: Mapped[int] = mapped_column(ForeignKey("users.id", ondelete="SET NULL"))
     date_from: Mapped[date] = mapped_column(Date)
     date_to: Mapped[date] = mapped_column(Date)
     price: Mapped[float]

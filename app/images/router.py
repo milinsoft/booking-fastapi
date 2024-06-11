@@ -1,12 +1,16 @@
 from shutil import copyfileobj
 
 from fastapi import APIRouter, UploadFile, status
+from app.tasks.tasks import process_pic
 
 router = APIRouter(prefix="/images", tags=["Images UPLOAD"])
 
 
 @router.post("/hotels", status_code=status.HTTP_201_CREATED)
-async def add_hotel_image(filename: str, fileuploader: UploadFile) -> str:
-    with open(f"static/images/{filename}.webp", "wb+") as f:
+async def add_hotel_image(filename: str, fileuploader: UploadFile) -> str | None:
+    img_path = f"app/static/images/{filename}.webp"
+    with open(img_path, "wb+") as f:
         copyfileobj(fileuploader.file, f)
-    return "Upload Successful"
+    process_pic.delay(img_path)
+    # process_pic(img_path)
+    # return "Your picture be uploaded in background!"

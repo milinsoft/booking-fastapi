@@ -1,47 +1,5 @@
 {% extends 'base.html.jinja' %}
-{% block header %}
-    <nav class="navbar bg-light">
-        <div class="container-fluid">
-            <a class="navbar-brand">Book your hotel</a>
-            <form class="d-flex justify-content-center" style="width: 600px; margin-left: 500px;" role="search">
-                <input name="location" required="true" class="form-control me-2" type="text" placeholder="City" aria-label="City"/>
-                <input name="date_from" required="true"  class="form-control me-2" type="date" aria-label="date-from"/>
-                <input name="date_to" required="true"  class="form-control me-2" type="date" aria-label="date-to"/>
-                <button class="btn btn-outline-warning" type="submit">Search</button>
-     </form>
-        </div>
-    </nav>
-{% endblock %}
 
 {% block body %}
-    {% for hotel in hotels %}
-        <div name="{{ hotel.id }}" style="display: flex; margin-bottom: 1em; margin-left: 400px;">
-            <div class="card mb-3" style="max-width: 800px; min-width:800px; max-height: 300px;">
-                <div class="row g-0">
-                    <div class="col-md-4">
-                        <img src="{{ url_for('static', path='images/' + hotel.image_id | string +'.webp') }}"
-                             class="img-fluid rounded-start" alt="hotel image">
-                    </div>
-                    <div class="col-md-8">
-                        <div class="card-body flex-container">
-                            <h5 class="card-title">{{ hotel.name }}</h5>
-                            <p class="card-title text-muted small" style="margin-top: -10px;">{{ hotel.location }}</p>
-                            {% for service in hotel.services %}
-                                <span class="badge badge-pill bg-secondary">{{ service }}</span>
-                            {% endfor %}
-                            <div class="d-flex justify-content-end">
-                                <button class="btn btn-warning">Pick Room</button>
-                            </div>
-                                <p class="card-text"><small class="text-body-secondary">Rooms
-                                    left: {{ hotel.rooms_left }} out
-                                    of {{ hotel.rooms_quantity }}</small>
-                                </p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-        </div>
-    {% endfor %}
+    {% include '/embedded/hotel-overview-card.html.jinja' %}
 {% endblock %}

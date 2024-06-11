@@ -9,9 +9,26 @@ from app.images.router import router as images_router
 from app.pages.router import router as page_router
 from app.users.router import router as user_router
 
-app = FastAPI()
+from fastapi_cache import FastAPICache
+from fastapi_cache.backends.redis import RedisBackend
+from fastapi_cache.decorator import cache
 
-app.mount("/static", StaticFiles(directory="static"), name="static")
+from redis import asyncio as aioredis
+from contextlib import asynccontextmanager
+from collections.abc import AsyncIterator
+from app.config import settings
+
+@asynccontextmanager
+async def lifespan(_: FastAPI) -> AsyncIterator[None]:
+    redis = aioredis.from_url(f"redis://{settings.REDIS_HOST_URL}:{settings.REDIS_PORT}")
+    FastAPICache.init(RedisBackend(redis), prefix="cache:")
+    yield
+
+app = FastAPI(lifespan=lifespan, title="Hotels Booking", root_path="/api")
+
+app.mount("/static", StaticFiles(directory="app/static"), "static")
+
+
 
 # API Routers
 app.include_router(user_router)

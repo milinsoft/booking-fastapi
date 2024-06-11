@@ -1,0 +1,12 @@
+{% extends "base.html.jinja" %}
+{% block styles %}
+    [name="buttons"] {
+    display: none;
+    }
+{% endblock %}
+
+{% block body%}
+    {% with formtitle="Create an account!", action="/register" %}
+        {% include "embedded/auth-form.html.jinja"%}
+    {% endwith %}
+{% endblock %}

@@ -18,6 +18,13 @@ class Settings(BaseSettings):
     # JWT
     SECRET_KEY: str = os.getenv("SECRET_KEY")
     ALGORITHM: str = os.getenv("ALGORITHM")
-
+    # Cache
+    REDIS_HOST_URL: str = os.getenv("REDIS_HOST_URL")
+    REDIS_PORT: str = os.getenv("REDIS_PORT")
+    # SMTP
+    SMTP_HOST: str = os.getenv("SMTP_HOST")
+    SMTP_PORT: str = os.getenv("SMTP_PORT")
+    SMTP_USER: str = os.getenv("SMTP_USER")
+    SMTP_PASSWORD: str = os.getenv("SMTP_PASSWORD")
 
 settings = Settings()
