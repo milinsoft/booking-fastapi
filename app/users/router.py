@@ -6,6 +6,7 @@ from app.users.auth import authenticate_user, create_access_token, get_password_
 from app.users.dao import UserDAO
 from app.users.dependencies import get_current_admin_user, get_current_user
 from app.users.schemas import SUserAuth
+from fastapi import BackgroundTasks
 
 router = APIRouter(prefix="/auth", tags=["Auth Users"])
 

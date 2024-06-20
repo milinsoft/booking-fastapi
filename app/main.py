@@ -17,6 +17,9 @@ from redis import asyncio as aioredis
 from contextlib import asynccontextmanager
 from collections.abc import AsyncIterator
 from app.config import settings
+from sqladmin import Admin
+from app.database import engine
+from app.admin.views import UserAdminView, BookingAdminView
 
 @asynccontextmanager
 async def lifespan(_: FastAPI) -> AsyncIterator[None]:
@@ -24,11 +27,10 @@ async def lifespan(_: FastAPI) -> AsyncIterator[None]:
     FastAPICache.init(RedisBackend(redis), prefix="cache:")
     yield
 
-app = FastAPI(lifespan=lifespan, title="Hotels Booking", root_path="/api")
+
+app = FastAPI(lifespan=lifespan, title="Hotels Booking")
 
 app.mount("/static", StaticFiles(directory="app/static"), "static")
-
-
 
 # API Routers
 app.include_router(user_router)
@@ -54,6 +56,12 @@ app.add_middleware(
         "Authorization",
     ],
 )
+
+
+
+admin = Admin(app, engine)
+admin.add_view(UserAdminView)
+admin.add_view(BookingAdminView)
 
 if __name__ == "__main__":
     uvicorn.run("app.main:app", host="0.0.0.0", port=8000, reload=True)
