@@ -19,7 +19,9 @@ from collections.abc import AsyncIterator
 from app.config import settings
 from sqladmin import Admin
 from app.database import engine
-from app.admin.views import UserAdminView, BookingAdminView
+from app.admin.views import UserAdminView, BookingAdminView, HotelAdminView, RoomAdminView
+from app.admin.auth import authentication_backend
+
 
 @asynccontextmanager
 async def lifespan(_: FastAPI) -> AsyncIterator[None]:
@@ -59,9 +61,11 @@ app.add_middleware(
 
 
 
-admin = Admin(app, engine)
+admin = Admin(app, engine, authentication_backend=authentication_backend)
 admin.add_view(UserAdminView)
 admin.add_view(BookingAdminView)
+admin.add_view(HotelAdminView)
+admin.add_view(RoomAdminView)
 
 if __name__ == "__main__":
     uvicorn.run("app.main:app", host="0.0.0.0", port=8000, reload=True)

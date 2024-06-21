@@ -14,4 +14,4 @@ class User(Base):
     bookings: Mapped[list["Booking"]] = relationship(back_populates="user")
 
     def __str__(self) -> str:
-        return f"User {self.email}"
+        return self.email
