@@ -1,8 +1,9 @@
 from sqladmin import Admin, ModelView
-from app.database import engine
-from app.users.models import User
+
 from app.bookings.models import Booking
+from app.database import engine
 from app.hotels import Hotel, Room
+from app.users.models import User
 
 
 class UserAdminView(ModelView, model=User):
@@ -18,7 +19,6 @@ class UserAdminView(ModelView, model=User):
     page_size_options = [20, 50, 100, 200]
 
 
-
 class BookingAdminView(ModelView, model=Booking):
     column_exclude_list = [Booking.user_id]
     column_details_exclude_list = [Booking.user_id]
@@ -27,13 +27,13 @@ class BookingAdminView(ModelView, model=Booking):
     icon = "fa-solid fa-list"
 
 
-
 class HotelAdminView(ModelView, model=Hotel):
     column_exclude_list = [Hotel.id]
     column_details_exclude_list = [Hotel.id]
     name = "Hotel"
     name_plural = "Hotels"
     icon = "fa-solid fa-hotel"
+
 
 class RoomAdminView(ModelView, model=Room):
     column_exclude_list = [Room.id]

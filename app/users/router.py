@@ -1,24 +1,27 @@
-from fastapi import APIRouter, Depends, HTTPException, Response, status
+from fastapi import (APIRouter, BackgroundTasks, Depends, HTTPException,
+                     Response, status)
 
-from app.exceptions import InvalidCredentialsException, UserAlreadyExistsException
+from app.exceptions import (InvalidCredentialsException,
+                            UserAlreadyExistsException)
 from app.users import User
-from app.users.auth import authenticate_user, create_access_token, get_password_hash
+from app.users.auth import (authenticate_user, create_access_token,
+                            get_password_hash)
 from app.users.dao import UserDAO
 from app.users.dependencies import get_current_admin_user, get_current_user
 from app.users.schemas import SUserAuth
-from fastapi import BackgroundTasks
 
 router = APIRouter(prefix="/auth", tags=["Auth Users"])
 
 
-@router.post("/register")
-async def register_user(user_data: SUserAuth) -> int:
+@router.post("/register", status_code=status.HTTP_201_CREATED)
+async def register_user(user_data: SUserAuth) -> None:
     existing_user = await UserDAO.find_one_or_none(email=user_data.email)
     if existing_user:
         raise UserAlreadyExistsException
+    # TODO: move it to the service
     hashed_password = get_password_hash(user_data.password)
-    user_id = await UserDAO.create_one(email=user_data.email, hashed_password=hashed_password)
-    return user_id
+    await UserDAO.create_one(email=user_data.email, hashed_password=hashed_password)
+    return None
 
 
 @router.post("/login")

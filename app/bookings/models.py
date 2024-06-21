@@ -1,10 +1,11 @@
 from datetime import date
+from typing import Any
 
 from sqlalchemy import Computed, Date, ForeignKey
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from ..database import Base
-from typing import Any
+
 
 class Booking(Base):
     __tablename__ = "bookings"

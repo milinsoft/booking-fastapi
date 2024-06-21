@@ -1,6 +1,7 @@
 from shutil import copyfileobj
 
 from fastapi import APIRouter, UploadFile, status
+
 from app.tasks.tasks import process_pic
 
 router = APIRouter(prefix="/images", tags=["Images UPLOAD"])

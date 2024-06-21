@@ -21,5 +21,5 @@ class SBookingInfo(SBooking):
     image_id: int
     # Room params
     name: str
-    description: str
+    description: str | None
     services: list[str]

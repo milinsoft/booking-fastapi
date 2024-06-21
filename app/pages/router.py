@@ -8,9 +8,8 @@ from fastapi.templating import Jinja2Templates
 from app.exceptions import MissingTokenException
 from app.hotels.rooms.router import get_rooms
 from app.hotels.router import get_hotels_by_location
-from app.users.router import get_current_user, login_user
-from app.users.router import logout_user
-from app.users.router import register_user
+from app.users.router import (get_current_user, login_user, logout_user,
+                              register_user)
 from app.users.schemas import SUserAuth
 
 router = APIRouter(tags=["Front-end"], include_in_schema=False)
@@ -19,6 +18,7 @@ templates = Jinja2Templates(directory="app/templates")
 
 
 # FIXME: implement mechanism to check whether user logged in globally for all pages.
+
 
 @router.get("/")
 async def get_home_page(request: Request):
@@ -31,18 +31,29 @@ async def get_home_page(request: Request):
         except MissingTokenException:
             user = None
         logged_in = bool(user)
-    return templates.TemplateResponse("index.html.jinja", {"request": request, "logged_in": logged_in})
+    return templates.TemplateResponse(
+        "index.html.jinja", {"request": request, "logged_in": logged_in}
+    )
 
 
 @router.get("/hotels")
 async def get_hotels_page(request: Request, hotels=Depends(get_hotels_by_location)):
-    return templates.TemplateResponse(name="hotels.html.jinja", context={"request": request, "hotels": hotels})
+    return templates.TemplateResponse(
+        name="hotels.html.jinja", context={"request": request, "hotels": hotels}
+    )
 
 
 @router.get("/hotels/{hotel_id}/rooms")
-async def get_rooms_page(request: Request, date_from: date, date_to: date, rooms=Depends(get_rooms)):
+async def get_rooms_page(
+    request: Request, date_from: date, date_to: date, rooms=Depends(get_rooms)
+):
     return templates.TemplateResponse(
-        name="rooms.html.jinja", context={"request": request, "rooms": rooms, "total_days": (date_to - date_from).days}
+        name="rooms.html.jinja",
+        context={
+            "request": request,
+            "rooms": rooms,
+            "total_days": (date_to - date_from).days,
+        },
     )
 
 
@@ -52,7 +63,9 @@ async def get_register_user(request: Request):
 
 
 @router.post("/register")
-async def post_register_user(email: Annotated[str, Form()], password: Annotated[str, Form()]):
+async def post_register_user(
+    email: Annotated[str, Form()], password: Annotated[str, Form()]
+):
     await register_user(SUserAuth(email=email, password=password))
     return RedirectResponse("/", status_code=303)
 
@@ -63,7 +76,9 @@ async def get_login_user(request: Request):
 
 
 @router.post("/login")
-async def post_log_in_user(email: Annotated[str, Form()], password: Annotated[str, Form()]):
+async def post_log_in_user(
+    email: Annotated[str, Form()], password: Annotated[str, Form()]
+):
     response = RedirectResponse("/", status_code=303)
     await login_user(response, SUserAuth(email=email, password=password))
     return response

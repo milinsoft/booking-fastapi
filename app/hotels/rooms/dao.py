@@ -1,6 +1,8 @@
 from datetime import date
+from typing import Annotated
 
 from fastapi import Depends
+from pydantic import TypeAdapter
 from sqlalchemy import func, select
 
 from app.bookings.dao import BookingDAO
@@ -11,8 +13,6 @@ from app.hotels import Hotel
 from app.hotels.dependencies import HotelsSearchArgs
 from app.hotels.rooms.models import Room
 from app.hotels.rooms.schemas import SRoom
-from pydantic import TypeAdapter
-from typing import Annotated
 
 Rooms = Annotated[list[SRoom], "Rooms"]
 

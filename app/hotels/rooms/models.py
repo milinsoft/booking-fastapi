@@ -9,7 +9,7 @@ class Room(Base):
 
     hotel_id: Mapped[int] = mapped_column(ForeignKey("hotels.id"))
     name: Mapped[str]
-    description: Mapped[str]
+    description: Mapped[str | None]
     price: Mapped[float]
     services: Mapped[list] = mapped_column(JSON)
     quantity: Mapped[int]

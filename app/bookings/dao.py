@@ -2,6 +2,7 @@
 from datetime import date
 
 from fastapi import Depends, Response, status
+from pydantic import TypeAdapter
 from sqlalchemy import CTE, and_, delete, func, or_, select
 
 from app.bookings import Booking
@@ -9,16 +10,12 @@ from app.bookings.schemas import SBooking, SBookingInfo
 from app.dao import BaseDAO
 from app.database import async_session_maker
 from app.dependencies import DateSearchArgs
-from app.exceptions import (
-    BookingCancellationException,
-    BookingNotFoundException,
-    InvalidBookingDates,
-    RoomBookingException,
-)
+from app.exceptions import (BookingCancellationException,
+                            BookingNotFoundException, InvalidBookingDates,
+                            RoomBookingException)
 from app.hotels import Hotel, Room
 from app.users import User
 from app.users.dependencies import get_current_user
-from pydantic import TypeAdapter
 
 bookings_adapter = TypeAdapter(list[SBookingInfo])
 
@@ -66,26 +63,30 @@ class BookingDAO(BaseDAO):
         return booked_rooms
 
     @classmethod
-    async def __get_rooms_available_qty(cls, room_id: int, dates: DateSearchArgs):
+    async def __get_room_available_qty(cls, room_id: int, dates: DateSearchArgs):
         booked_rooms_cte = cls.get_bookings_cte(dates, cls.model.room_id == room_id)
-
         async with async_session_maker() as session:
             get_rooms_left = (
                 select(
-                    (Room.quantity - func.count(booked_rooms_cte.c.room_id)).label(
-                        "Rooms left"
-                    )
+                    (
+                        Room.quantity - func.coalesce(booked_rooms_cte.c.qty_booked, 0)
+                    ).label("rooms_left")
                 )
-                .select_from(Room)
                 .join(
                     booked_rooms_cte,
                     booked_rooms_cte.c.room_id == Room.id,
                     isouter=True,
                 )
                 .where(Room.id == room_id)
-                .group_by(Room.quantity, booked_rooms_cte.c.room_id)
+                .group_by(Room.quantity, booked_rooms_cte.c.qty_booked)
             )
 
+            # RAW SQL QUERY with example params:
+            """WITH booked_rooms AS ...)
+                        SELECT rooms.quantity - coalesce(booked_rooms.qty_booked, 0) AS rooms_left 
+                            FROM rooms LEFT OUTER JOIN booked_rooms ON booked_rooms.room_id = rooms.id 
+                            WHERE rooms.id = 4 GROUP BY rooms.quantity, booked_rooms.qty_booked
+            """
             rooms_left = await session.execute(get_rooms_left)
             return rooms_left.scalar()
 
@@ -94,7 +95,8 @@ class BookingDAO(BaseDAO):
         cls, user_id: int, room_id: int, dates: DateSearchArgs
     ) -> Booking | None:
         date_from, date_to = dates.date_from, dates.date_to
-        if await cls.__get_rooms_available_qty(room_id, dates):
+        available_rooms = await cls.__get_room_available_qty(room_id, dates)
+        if available_rooms > 0:
             get_price = select(Room.price).where(Room.id == room_id)
             async with async_session_maker() as session:
                 price = await session.execute(get_price)

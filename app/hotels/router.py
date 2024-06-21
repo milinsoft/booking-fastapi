@@ -1,12 +1,12 @@
 from fastapi import APIRouter, Depends
-
+from fastapi_cache.decorator import cache
 from pydantic import parse_obj_as
+
 from app.dependencies import DateSearchArgs
 from app.exceptions import HotelNotFound, NoAvailableHotelsFound
 from app.hotels.dao import HotelDAO
 from app.hotels.dependencies import HotelsSearchArgs
 from app.hotels.schemas import SAvailableHotel, SHotel
-from fastapi_cache.decorator import cache
 
 router = APIRouter(
     prefix="/hotels",
@@ -16,7 +16,9 @@ router = APIRouter(
 
 @router.get("/{location}")
 @cache(expire=30)
-async def get_hotels_by_location(search_args: HotelsSearchArgs = Depends()) -> list[SAvailableHotel]:
+async def get_hotels_by_location(
+    search_args: HotelsSearchArgs = Depends(),
+) -> list[SAvailableHotel]:
     res = await HotelDAO.find_hotels_with_available_rooms(search_args)
     if not res:
         raise NoAvailableHotelsFound

@@ -1,5 +1,5 @@
 from fastapi import Depends
-from pydantic import BaseModel, ConfigDict
+from pydantic import BaseModel, ConfigDict, TypeAdapter
 from sqlalchemy import func, select
 
 from app.bookings.dao import BookingDAO
@@ -8,7 +8,6 @@ from app.database import async_session_maker
 from app.hotels import Hotel
 from app.hotels.dependencies import HotelsSearchArgs
 from app.hotels.schemas import SAvailableHotel, SHotel
-from pydantic import TypeAdapter
 
 rooms_adapter = TypeAdapter(list[SAvailableHotel])
 
@@ -18,7 +17,7 @@ class HotelDAO(BaseDAO):
 
     @classmethod
     async def find_hotels_with_available_rooms(
-            cls, search_args: HotelsSearchArgs = Depends()
+        cls, search_args: HotelsSearchArgs = Depends()
     ) -> list[SAvailableHotel]:
         location_filter = cls.model.location.ilike(f"%{search_args.location}%")
         booked_rooms_cte = BookingDAO.get_bookings_cte(search_args, location_filter)
@@ -26,9 +25,7 @@ class HotelDAO(BaseDAO):
             booked_rooms_cte.c.qty_booked, 0
         )
         hotels = (
-            select(
-                cls.model.__table__.columns, rooms_left_clause.label("rooms_left")
-            )
+            select(cls.model.__table__.columns, rooms_left_clause.label("rooms_left"))
             .join(
                 booked_rooms_cte,
                 cls.model.id == booked_rooms_cte.c.hotel_id,

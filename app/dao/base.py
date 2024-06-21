@@ -1,26 +1,27 @@
 # Data Access Object
+from typing import TypeVar
+
 from sqlalchemy import insert, select
 
-from app.database import async_session_maker
+from app.database import Base, async_session_maker
+
+OrmModel = TypeVar("OrmModel", bound=Base)
 
 
 class BaseDAO:
     model = None
 
     @classmethod
-    async def create_one(cls, return_value=None, **data) -> int:
+    async def create_one(cls, **data) -> OrmModel:
         async with async_session_maker() as session:
-            query = insert(cls.model).values(**data).returning(return_value or cls.model)
+            query = insert(cls.model).values(**data).returning(cls.model)
             record_id = await session.execute(query)
             await session.commit()
             return record_id.scalar_one()
 
     @classmethod
     async def find_by_id(cls, record_id):
-        async with async_session_maker() as session:
-            query = select(cls.model).where(cls.model.id == record_id)
-            result = await session.execute(query)
-            return result.scalars().one_or_none()
+        return await cls.find_one_or_none(id=record_id)
 
     @classmethod
     async def find_one_or_none(cls, **filter_by):

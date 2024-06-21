@@ -17,3 +17,7 @@ celery==5.4.0
 flower==2.0.1
 # Operations with pictures
 pillow==10.3.0
+# Tests
+pytest==8.2.2
+pytest-asyncio==0.23.7
+httpx==0.27.0

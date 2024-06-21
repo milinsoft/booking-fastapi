@@ -8,9 +8,9 @@ from app.bookings.schemas import SBooking, SBookingInfo
 from app.database import async_session_maker
 from app.dependencies import DateSearchArgs
 from app.exceptions import RoomBookingException
+from app.tasks.tasks import send_booking_confirmation_email
 from app.users import User
 from app.users.dependencies import get_current_user
-from app.tasks.tasks import send_booking_confirmation_email
 
 router = APIRouter(
     prefix="/bookings",
@@ -33,7 +33,9 @@ async def add_booking(
     new_booking = await BookingDAO.add(user.id, room_id, dates)
     if not new_booking:
         raise RoomBookingException
-    send_booking_confirmation_email.delay(TypeAdapter(SBooking).validate_python(new_booking).dict(), user.email)
+    send_booking_confirmation_email.delay(
+        TypeAdapter(SBooking).validate_python(new_booking).model_dump(), user.email
+    )
     return new_booking
 
 

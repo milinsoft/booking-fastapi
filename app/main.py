@@ -1,31 +1,33 @@
+from collections.abc import AsyncIterator
+from contextlib import asynccontextmanager
+
 import uvicorn
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
+from fastapi_cache import FastAPICache
+from fastapi_cache.backends.redis import RedisBackend
+from fastapi_cache.decorator import cache
+from redis import asyncio as aioredis
+from sqladmin import Admin
 
+from app.admin.auth import authentication_backend
+from app.admin.views import (BookingAdminView, HotelAdminView, RoomAdminView,
+                             UserAdminView)
 from app.bookings.router import router as booking_router
+from app.config import settings
+from app.database import engine
 from app.hotels.rooms.router import router as hotels_router
 from app.images.router import router as images_router
 from app.pages.router import router as page_router
 from app.users.router import router as user_router
 
-from fastapi_cache import FastAPICache
-from fastapi_cache.backends.redis import RedisBackend
-from fastapi_cache.decorator import cache
-
-from redis import asyncio as aioredis
-from contextlib import asynccontextmanager
-from collections.abc import AsyncIterator
-from app.config import settings
-from sqladmin import Admin
-from app.database import engine
-from app.admin.views import UserAdminView, BookingAdminView, HotelAdminView, RoomAdminView
-from app.admin.auth import authentication_backend
-
 
 @asynccontextmanager
 async def lifespan(_: FastAPI) -> AsyncIterator[None]:
-    redis = aioredis.from_url(f"redis://{settings.REDIS_HOST_URL}:{settings.REDIS_PORT}")
+    redis = aioredis.from_url(
+        f"redis://{settings.REDIS_HOST_URL}:{settings.REDIS_PORT}"
+    )
     FastAPICache.init(RedisBackend(redis), prefix="cache:")
     yield
 
@@ -58,7 +60,6 @@ app.add_middleware(
         "Authorization",
     ],
 )
-
 
 
 admin = Admin(app, engine, authentication_backend=authentication_backend)
