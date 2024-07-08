@@ -35,8 +35,8 @@ class HotelAdminView(ModelView, model=Hotel):
 
 
 class RoomAdminView(ModelView, model=Room):
-    column_exclude_list = [Room.id]
-    column_details_exclude_list = [Room.id]
+    column_exclude_list = [Room.id, Room.bookings]
+    column_details_exclude_list = [Room.id, Room.bookings]
     name = "Room"
     name_plural = "Rooms"
     icon = "fa-solid fa-person-shelter"
