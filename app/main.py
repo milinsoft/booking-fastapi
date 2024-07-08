@@ -66,9 +66,8 @@ app.include_router(images_router)
 app = VersionedFastAPI(
     app,
     version_format="{major}",
-    prefix_format="/v{major}",
+    prefix_format="/api/v{major}",
     description="Hotels Booking API",
-    # root_path="/api",
     lifespan=lifespan,
 )
 
