@@ -27,12 +27,3 @@ class Booking(Base):
 
     def __str__(self) -> str:
         return f"Booking #{self.id}"
-
-
-# FIXME: events work only when objects are created via ORM level without insert() instruction
-# @event.listens_for(Booking, "before_delete")
-# def check_before_delete(mapper, connection, target):
-#     # if target.date_from < target.now(UTC).date():
-#     #     raise ValueError("AIDYGAHODIPHPDHPDH")
-#     # else:
-#     #     print("Everything is cool", target.date_from)

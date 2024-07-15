@@ -1,5 +1,4 @@
 # Data Access Object pattern
-from datetime import UTC, datetime
 
 from pydantic import TypeAdapter
 from sqlalchemy import CTE, and_, delete, func, or_, select
@@ -9,7 +8,6 @@ from app.bookings.schemas import SBookingInfo
 from app.dao import BaseDAO
 from app.database import async_session_maker
 from app.dependencies import DateSearchArgs
-from app.exceptions import dao
 from app.hotels import Hotel, Room
 
 bookings_adapter = TypeAdapter(list[SBookingInfo])
@@ -19,7 +17,7 @@ class BookingDAO(BaseDAO):
     model = Booking
 
     @classmethod
-    def get_bookings_cte(cls, dates: DateSearchArgs, *filters) -> CTE:
+    def get_existing_bookings_cte(cls, dates: DateSearchArgs, *filters) -> CTE:
         date_from, date_to = dates.date_from, dates.date_to
         if not filters:
             filters = []
@@ -60,8 +58,10 @@ class BookingDAO(BaseDAO):
         return booked_rooms
 
     @classmethod
-    async def __get_room_available_qty(cls, room_id: int, dates: DateSearchArgs):
-        booked_rooms_cte = cls.get_bookings_cte(dates, cls.model.room_id == room_id)
+    async def get_room_available_qty(cls, room_id: int, dates: DateSearchArgs):
+        booked_rooms_cte = cls.get_existing_bookings_cte(
+            dates, cls.model.room_id == room_id
+        )
         async with async_session_maker() as session:
             get_rooms_left = (
                 select(
@@ -88,27 +88,7 @@ class BookingDAO(BaseDAO):
             return rooms_left.scalar()
 
     @classmethod
-    async def add(
-        cls, user_id: int, room_id: int, dates: DateSearchArgs
-    ) -> Booking | None:
-        date_from, date_to = dates.date_from, dates.date_to
-        available_rooms = await cls.__get_room_available_qty(room_id, dates)
-        if available_rooms > 0:
-            get_price = select(Room.price).where(Room.id == room_id)
-            async with async_session_maker() as session:
-                price = await session.execute(get_price)
-                price: float = price.scalar()
-            return await cls.create_one(
-                room_id=room_id,
-                user_id=user_id,
-                date_from=date_from,
-                date_to=date_to,
-                price=price,
-            )
-        return None
-
-    @classmethod
-    async def get_user_bookings(cls, user_id: int):
+    async def get_user_bookings(cls, user_id: int) -> list[SBookingInfo]:
         """Returns all bookings for a particular user."""
         get_bookings = (
             select(
@@ -140,11 +120,6 @@ class BookingDAO(BaseDAO):
 
     @classmethod
     async def delete_booking(cls, booking_id: int, user_id: int):
-        booking = await super().find_one_or_none(user_id=user_id, id=booking_id)
-        if not booking:
-            raise dao.BookingNotFoundError
-        if booking.date_from < datetime.now(UTC).date():
-            raise dao.BookingCancellationError
         async with async_session_maker() as session:
             stmt = delete(cls.model).where(
                 cls.model.user_id == user_id, cls.model.id == booking_id

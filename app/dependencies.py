@@ -1,6 +1,6 @@
 from datetime import UTC, date, datetime
 
-from app.exceptions.http import InvalidBookingDates
+from app.exceptions import InvalidBookingDates
 
 MAX_STAY_LENGTH = 30
 

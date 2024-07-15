@@ -2,8 +2,8 @@ from typing import Literal
 
 from fastapi import APIRouter, Depends, Response, status
 
-from app.exceptions.http import (InvalidCredentialsException,
-                                 UserAlreadyExistsException)
+from app.exceptions import (InvalidCredentialsException,
+                            UserAlreadyExistsException)
 from app.users import User
 from app.users.auth import (authenticate_user, create_access_token,
                             get_password_hash)

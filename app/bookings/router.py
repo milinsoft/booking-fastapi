@@ -1,13 +1,15 @@
 from fastapi import APIRouter, Depends, status
 from pydantic import TypeAdapter
 
-from app.bookings.dao import BookingDAO
 from app.bookings.schemas import SBooking, SBookingInfo
+from app.bookings.service import BookingService
 from app.dependencies import DateSearchArgs
-from app.exceptions import dao, http
+from app.exceptions import (BookingCancellationException,
+                            BookingNotFoundException, RoomBookingException)
 from app.tasks.tasks import send_booking_confirmation_email
 from app.users import User
 from app.users.dependencies import get_current_user
+from app.utils.record_status_enum import RecordStatus
 
 router = APIRouter(
     prefix="/bookings",
@@ -15,9 +17,10 @@ router = APIRouter(
 )
 
 
+# FIXME: what is returned if user doesn't have any bookings
 @router.get("")
 async def get_bookings(user: User = Depends(get_current_user)) -> list[SBookingInfo]:
-    res = await BookingDAO.get_user_bookings(user_id=user.id)
+    res = await BookingService.get_user_bookings(user_id=user.id)
     return res
 
 
@@ -27,9 +30,11 @@ async def add_booking(
     dates: DateSearchArgs = Depends(),
     user: User = Depends(get_current_user),
 ) -> SBooking:
-    new_booking = await BookingDAO.add(user.id, room_id, dates)
-    if not new_booking:
-        raise http.RoomBookingException
+    new_booking = await BookingService.create_booking(
+        user_id=user.id, room_id=room_id, dates=dates
+    )
+    if new_booking == RecordStatus.NOT_CREATED:
+        raise RoomBookingException
     send_booking_confirmation_email.delay(
         TypeAdapter(SBooking).validate_python(new_booking).model_dump(), user.email
     )
@@ -38,7 +43,7 @@ async def add_booking(
 
 @router.get("/{booking_id}")
 async def get_booking(booking_id: int) -> SBooking | None:
-    res = await BookingDAO.find_by_id(booking_id)
+    res = await BookingService.find_by_id(booking_id)
     return res
 
 
@@ -46,10 +51,9 @@ async def get_booking(booking_id: int) -> SBooking | None:
 async def delete_booking(
     booking_id: int, user: User = Depends(get_current_user)
 ) -> None:
-    try:
-        await BookingDAO.delete_booking(booking_id, user.id)
-    except dao.BookingNotFoundError:
-        raise http.BookingNotFoundException
-    except dao.BookingCancellationError:
-        raise http.BookingCancellationException
+    delete_status = await BookingService.delete_booking(booking_id, user.id)
+    if delete_status == RecordStatus.NOT_FOUND:
+        raise BookingNotFoundException
+    if delete_status == RecordStatus.NOT_DELETED:
+        raise BookingCancellationException
     return None

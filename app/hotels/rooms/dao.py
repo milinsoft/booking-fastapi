@@ -21,7 +21,9 @@ class RoomDAO(BaseDAO):
     async def find_available_rooms(cls, hotel_id: int, dates: DateSearchArgs) -> Rooms:
         date_from = dates.date_from
         date_to = dates.date_to
-        existing_bookings_cte = BookingDAO.get_bookings_cte(dates, Hotel.id == hotel_id)
+        existing_bookings_cte = BookingDAO.get_existing_bookings_cte(
+            dates, Hotel.id == hotel_id
+        )
         rooms_left = cls.model.quantity - func.coalesce(
             existing_bookings_cte.c.qty_booked, 0
         )

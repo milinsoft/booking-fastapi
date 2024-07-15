@@ -20,7 +20,9 @@ class HotelDAO(BaseDAO):
         cls, search_args: HotelsSearchArgs = Depends()
     ) -> list[SAvailableHotel]:
         location_filter = cls.model.location.ilike(f"%{search_args.location}%")
-        booked_rooms_cte = BookingDAO.get_bookings_cte(search_args, location_filter)
+        booked_rooms_cte = BookingDAO.get_existing_bookings_cte(
+            search_args, location_filter
+        )
         rooms_left_clause = cls.model.rooms_quantity - func.coalesce(
             booked_rooms_cte.c.qty_booked, 0
         )

@@ -3,7 +3,7 @@ from sqladmin.authentication import AuthenticationBackend
 from starlette.requests import Request
 from starlette.responses import RedirectResponse
 
-from app.exceptions.http import InvalidCredentialsException
+from app.exceptions import InvalidCredentialsException
 from app.users.auth import authenticate_user, create_access_token
 from app.users.dependencies import get_current_user
 

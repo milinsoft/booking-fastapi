@@ -3,15 +3,11 @@ from datetime import UTC, datetime, timedelta
 import pytest
 
 from app.bookings.dao import BookingDAO
-from app.exceptions.dao import BookingCancellationError, BookingNotFoundError
+from app.exceptions import BookingCancellationException, BookingNotFoundException
 
 today = datetime.now(UTC).date()
 tomorrow = today + timedelta(days=1)
 two_weeks_ago = today - timedelta(days=14)
-
-
-# FIXME: DAO layer can't have HTTP exceptions.
-#  create service layer?
 
 
 @pytest.mark.parametrize(
@@ -53,15 +49,3 @@ async def test_01_create_booking_dao_crud(
     found_booking = await BookingDAO.find_by_id(booking_id)
     # THEN
     assert not found_booking
-
-
-async def test_02_delete_past_booking():
-    # WHEN\THEN
-    with pytest.raises(BookingCancellationError):
-        await BookingDAO.delete_booking(booking_id=1, user_id=1)
-
-
-async def test_03_delete_non_exising_booking():
-    # WHEN\THEN
-    with pytest.raises(BookingNotFoundError):
-        await BookingDAO.delete_booking(booking_id=999999, user_id=1)

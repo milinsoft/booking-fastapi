@@ -122,7 +122,6 @@ async def test_03_get_and_delete_bookings(auth_ac: AsyncClient):
     assert all([lambda r: r.status_code == status.HTTP_204_NO_CONTENT, responses])
     response = await auth_ac.get("/api/v1/bookings")
     bookings = response.json()
-    # THEN
     assert len(bookings) == 2
     # Case 2.
     # WHEN
@@ -134,3 +133,4 @@ async def test_03_get_and_delete_bookings(auth_ac: AsyncClient):
     bookings = response.json()
     # THEN
     assert len(bookings) == 2
+

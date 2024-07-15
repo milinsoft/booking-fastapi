@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends
 from fastapi_cache.decorator import cache
 
-from app.exceptions.http import HotelNotFound, NoAvailableHotelsFound
+from app.exceptions import HotelNotFound, NoAvailableHotelsFound
 from app.hotels.dao import HotelDAO
 from app.hotels.dependencies import HotelsSearchArgs
 from app.hotels.schemas import SAvailableHotel, SHotel
