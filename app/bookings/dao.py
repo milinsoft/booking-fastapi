@@ -10,7 +10,7 @@ from app.database import async_session_maker
 from app.dependencies import DateSearchArgs
 from app.hotels import Hotel, Room
 
-bookings_adapter = TypeAdapter(list[SBookingInfo])
+sbookings_info_adapter = TypeAdapter(list[SBookingInfo])
 
 
 class BookingDAO(BaseDAO):
@@ -116,7 +116,7 @@ class BookingDAO(BaseDAO):
         """
         async with async_session_maker() as session:
             bookings = await session.execute(get_bookings)
-            return bookings_adapter.validate_python(bookings.all())
+            return sbookings_info_adapter.validate_python(bookings.all())
 
     @classmethod
     async def delete_booking(cls, booking_id: int, user_id: int):

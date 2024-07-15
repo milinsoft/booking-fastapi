@@ -16,10 +16,13 @@ router = APIRouter(
     tags=["Bookings"],
 )
 
+sbooking_adapter = TypeAdapter(SBooking)
 
-# FIXME: what is returned if user doesn't have any bookings
+
 @router.get("")
-async def get_bookings(user: User = Depends(get_current_user)) -> list[SBookingInfo]:
+async def get_bookings(
+    user: User = Depends(get_current_user),
+) -> list[SBookingInfo | None]:
     res = await BookingService.get_user_bookings(user_id=user.id)
     return res
 
@@ -36,7 +39,7 @@ async def add_booking(
     if new_booking == RecordStatus.NOT_CREATED:
         raise RoomBookingException
     send_booking_confirmation_email.delay(
-        TypeAdapter(SBooking).validate_python(new_booking).model_dump(), user.email
+        sbooking_adapter.validate_python(new_booking).model_dump(), user.email
     )
     return new_booking
 

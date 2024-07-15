@@ -3,7 +3,6 @@ from datetime import UTC, datetime, timedelta
 import pytest
 
 from app.bookings.dao import BookingDAO
-from app.exceptions import BookingCancellationException, BookingNotFoundException
 
 today = datetime.now(UTC).date()
 tomorrow = today + timedelta(days=1)

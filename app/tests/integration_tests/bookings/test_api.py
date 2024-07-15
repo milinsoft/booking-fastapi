@@ -133,4 +133,3 @@ async def test_03_get_and_delete_bookings(auth_ac: AsyncClient):
     bookings = response.json()
     # THEN
     assert len(bookings) == 2
-

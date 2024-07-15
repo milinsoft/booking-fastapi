@@ -24,8 +24,8 @@ async def get_hotels_by_location(
 
 
 @router.get("/id/{id}")
-async def get_hotel_by_id(id: int) -> SHotel:
-    hotel = await HotelDAO.find_by_id(id)
+async def get_hotel_by_id(hotel_id: int) -> SHotel:
+    hotel = await HotelDAO.find_by_id(hotel_id)
     if not hotel:
         raise HotelNotFound
     return hotel

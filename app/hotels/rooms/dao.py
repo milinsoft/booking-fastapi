@@ -12,6 +12,7 @@ from app.hotels.rooms.models import Room
 from app.hotels.rooms.schemas import SRoom
 
 Rooms = Annotated[list[SRoom], "Rooms"]
+rooms_adapter = TypeAdapter(Rooms)
 
 
 class RoomDAO(BaseDAO):
@@ -57,4 +58,4 @@ class RoomDAO(BaseDAO):
         """
         async with async_session_maker() as session:
             available_rooms = await session.execute(get_available_rooms)
-            return TypeAdapter(Rooms).validate_python(available_rooms.mappings().all())
+            return rooms_adapter.validate_python(available_rooms.mappings().all())

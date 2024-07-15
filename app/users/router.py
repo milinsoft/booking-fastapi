@@ -19,7 +19,6 @@ async def register_user(user_data: SUserAuth) -> Literal["User has been created"
     existing_user = await UserDAO.find_one_or_none(email=user_data.email)
     if existing_user:
         raise UserAlreadyExistsException
-    # TODO: move it to the service
     hashed_password = get_password_hash(user_data.password)
     await UserDAO.create_one(email=user_data.email, hashed_password=hashed_password)
     return "User has been created"
