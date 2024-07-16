@@ -16,7 +16,7 @@ class UserNotFoundException(BookingException):
 
 class UserAlreadyExistsException(BookingException):
     status_code = status.HTTP_409_CONFLICT
-    details = "User already exists"
+    detail = "User already exists"
 
 
 class InvalidCredentialsException(BookingException):
