@@ -17,12 +17,10 @@ class Settings(BaseSettings):
     DB_NAME: str
     TEST_DB_NAME: str
 
-    @property
     @computed_field
     def is_test_mode(self) -> bool:
         return self.MODE == "TEST"
 
-    @property
     @computed_field
     def DB_URL(self) -> str:  # noqa N802
         db_name = self.TEST_DB_NAME if self.is_test_mode else self.DB_NAME
