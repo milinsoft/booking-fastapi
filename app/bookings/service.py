@@ -18,7 +18,9 @@ class BookingService:
     ) -> Booking | RecordStatus:
         available_rooms = await cls.dao.get_room_available_qty(room_id, dates)
         if available_rooms > 0:
-            room: Room = await RoomDAO.find_by_id(room_id)
+            room: Room = await RoomDAO.find_by_id(
+                room_id
+            )  # pyright: ignore [reportArgumentType, reportAssignmentType]
             room_price = room.price
             return await cls.dao.create_one(
                 room_id=room_id,

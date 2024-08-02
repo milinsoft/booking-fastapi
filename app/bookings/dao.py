@@ -121,7 +121,9 @@ class BookingDAO(BaseDAO):
     @classmethod
     async def delete_booking(cls, booking_id: int, user_id: int):
         async with async_session_maker() as session:
-            stmt = delete(cls.model).where(
+            stmt = delete(
+                cls.model  # pyright: ignore [reportArgumentType]
+            ).where(
                 cls.model.user_id == user_id, cls.model.id == booking_id
             )
             await session.execute(stmt)

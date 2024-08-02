@@ -7,7 +7,7 @@ from app.database import Base, async_session_maker
 
 
 class BaseDAO:
-    model = None
+    model: type[Base] | None = None
 
     @classmethod
     async def create_one(cls, **data) -> Base:
