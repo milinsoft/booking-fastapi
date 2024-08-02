@@ -55,7 +55,7 @@ isort==5.13.2
 mypy-extensions==1.0.0
 pycodestyle==2.12.0
 pyflakes==3.2.0
-pyright==1.1.370
+pyright==1.1.374
 pytest==8.2.2
 pytest-asyncio==0.23.7
 time-machine==2.14.1
